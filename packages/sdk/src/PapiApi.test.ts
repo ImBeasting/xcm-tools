@@ -968,6 +968,7 @@ describe('PapiApi', () => {
       const ahQuoteSpy = vi.fn().mockResolvedValue(convertedFee)
       const ahApiMock = {
         init: vi.fn().mockResolvedValue(undefined),
+        disconnect: vi.fn().mockResolvedValue(undefined),
         ahpApi: {
           apis: { AssetConversionApi: { quote_price_exact_tokens_for_tokens: ahQuoteSpy } }
         }
@@ -987,6 +988,7 @@ describe('PapiApi', () => {
       expect(cloneSpy).toHaveBeenCalledTimes(1)
       expect(ahInitSpy).toHaveBeenCalledWith('AssetHubPolkadot')
       expect(localizeLocation).toHaveBeenCalledWith('AssetHubPolkadot', asset.location)
+      expect(ahApiMock.disconnect).toHaveBeenCalled()
       expect(ahQuoteSpy).toHaveBeenCalledWith(
         { transformed: true },
         { transformed: true },
@@ -1013,6 +1015,7 @@ describe('PapiApi', () => {
 
       const ahApiMock = {
         init: vi.fn().mockResolvedValue(undefined),
+        disconnect: vi.fn().mockResolvedValue(undefined),
         ahpApi: {
           apis: {
             AssetConversionApi: {

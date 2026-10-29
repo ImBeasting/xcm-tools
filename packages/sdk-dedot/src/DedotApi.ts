@@ -451,10 +451,17 @@ class DedotApi<TCustomChain extends string = never> extends PolkadotApi<
         const err = eventResult?.err ?? eventResult?.value;
         if (err?.type) {
           const subErr = err.value;
-          if (subErr) {
+          // Only Module errors carry an index that can be resolved against the
+          // runtime metadata. Token, Arithmetic and Transactional errors carry
+          // their own reason.
+          if (err.type === "Module" && subErr) {
             return resolveModuleError(chain, subErr as TModuleError);
           }
-          return { reason: err.type };
+          return {
+            reason: subErr
+              ? `${String(err.type)}: ${String(subErr)}`
+              : String(err.type),
+          };
         }
       }
 

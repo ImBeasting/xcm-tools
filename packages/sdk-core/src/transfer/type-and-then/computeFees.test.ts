@@ -56,12 +56,10 @@ describe('computeAllFees', () => {
     vi.mocked(padValueBy).mockImplementation(value => value)
   })
 
-  it('returns null fees when dry run is not supported', async () => {
+  it('throws when dry run is not supported and no fee source is given', async () => {
     hasDryRunSupportMock.mockReturnValue(false)
 
-    const result = await computeAllFees(context, buildTx)
-
-    expect(result).toEqual(null)
+    await expect(computeAllFees(context, buildTx)).rejects.toThrow(ScenarioNotSupportedError)
 
     expect(assertSender).toHaveBeenCalled()
     expect(assertAddressIsString).toHaveBeenCalled()

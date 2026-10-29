@@ -32,7 +32,7 @@ const sumHopFees = <TApi, TRes, TSigner, TCustomChain extends string = never>(
 export const computeAllFees = async <TApi, TRes, TSigner, TCustomChain extends string = never>(
   context: TTypeAndThenCallContext<TApi, TRes, TSigner, TCustomChain>,
   buildTx: TTxFactory<TRes>
-): Promise<TTypeAndThenFees | null> => {
+): Promise<TTypeAndThenFees> => {
   const {
     origin,
     dest,
@@ -49,7 +49,9 @@ export const computeAllFees = async <TApi, TRes, TSigner, TCustomChain extends s
         `Fee asset cannot be used on ${origin.chain} because it does not support dry run.`
       )
     }
-    return null
+    throw new ScenarioNotSupportedError(
+      `Cannot compute fees for ${origin.chain} because it does not support dry run.`
+    )
   }
 
   const result = await getXcmFeeInternal({

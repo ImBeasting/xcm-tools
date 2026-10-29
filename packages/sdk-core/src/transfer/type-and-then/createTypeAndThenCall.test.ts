@@ -10,7 +10,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import type { PolkadotApi } from '../../api'
 import { DOT_LOCATION, RELAY_LOCATION } from '../../constants'
-import { BridgeHaltedError } from '../../errors'
+import { BridgeHaltedError, ScenarioNotSupportedError } from '../../errors'
 import type { TSerializedExtrinsics, TTypeAndThenCallContext, TTypeAndThenFees } from '../../types'
 import { createAsset, getRelayChainOf, normalizeAmount, parseUnits, sortAssets } from '../../utils'
 import { getBridgeStatus } from '../getBridgeStatus'
@@ -288,6 +288,19 @@ describe('createTypeAndThenCall', () => {
       BridgeHaltedError
     )
     expect(getBridgeStatus).toHaveBeenCalledWith(mockApi.clone())
+  })
+
+  it('propagates the unsupported error when fees cannot be computed', async () => {
+    vi.mocked(computeAllFees).mockRejectedValue(
+      new ScenarioNotSupportedError(
+        'Cannot compute fees for Peaq because it does not support dry run.'
+      )
+    )
+
+    await expect(createTypeAndThenCall(mockContext.options)).rejects.toBeInstanceOf(
+      ScenarioNotSupportedError
+    )
+    expect(buildTypeAndThenCall).not.toHaveBeenCalled()
   })
 
   it('should resolve system asset amount when calculating fees', async () => {

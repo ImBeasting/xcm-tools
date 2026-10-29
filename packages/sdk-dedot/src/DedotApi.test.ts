@@ -1784,6 +1784,38 @@ describe("DedotApi", () => {
       );
     });
 
+    it("reports a non-module execution error with its own reason", async () => {
+      vi.spyOn(dedotApi, "findNativeAssetInfoOrThrow").mockReturnValue(asset);
+      mockApiRaw.call.dryRunApi.dryRunCall.mockResolvedValue({
+        isOk: true,
+        value: {
+          executionResult: {
+            isOk: false,
+            value: { error: { type: "Token", value: "FundsUnavailable" } },
+          },
+          forwardedXcms: [],
+        },
+      });
+
+      const result = await dedotApi.getDryRunCall({
+        tx: mockTx,
+        address: "5Alice",
+        chain: "Darwinia",
+        destination: "Acala",
+        version: Version.V5,
+        asset: { ...asset, amount: 1n },
+      });
+
+      expect(result).toEqual(
+        expect.objectContaining({
+          success: false,
+          dryRunError: expect.objectContaining({
+            reason: "Token: FundsUnavailable",
+          }),
+        }),
+      );
+    });
+
     it("keeps the first failure when the versioned retry throws", async () => {
       vi.spyOn(dedotApi, "findNativeAssetInfoOrThrow").mockReturnValue(asset);
       mockApiRaw.call.dryRunApi.dryRunCall

@@ -431,9 +431,30 @@ class DedotApi<TCustomChain extends string = never> extends PolkadotApi<
       const execErr = execResult?.value ?? execResult?.err;
 
       if (execErr?.error) {
-        const modErr = execErr.error?.value;
-        if (modErr) {
-          return resolveModuleError(chain, modErr as TModuleError);
+        const errorType = execErr.error?.type;
+        const errorValue = execErr.error?.value;
+        // Only Module errors carry an index that can be resolved against the
+        // runtime metadata. Token, Arithmetic and Transactional errors carry
+        // their own reason on this path too.
+        const isModuleError =
+          errorValue !== null &&
+          typeof errorValue === "object" &&
+          "index" in (errorValue as object);
+        if (isModuleError) {
+          return resolveModuleError(chain, errorValue as TModuleError);
+        }
+        if (errorType && errorValue !== undefined && errorValue !== null) {
+          return { reason: `${String(errorType)}: ${String(errorValue)}` };
+        }
+        if (typeof errorValue === "string" || typeof errorValue === "number") {
+          return { reason: String(errorValue) };
+        }
+        if (
+          errorValue &&
+          typeof errorValue === "object" &&
+          "type" in (errorValue as object)
+        ) {
+          return { reason: String((errorValue as { type: unknown }).type) };
         }
         const otherErr = execErr.error?.Other ?? execErr.error?.other;
         if (otherErr) {

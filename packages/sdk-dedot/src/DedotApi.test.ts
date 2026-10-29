@@ -1512,6 +1512,7 @@ describe("DedotApi", () => {
           addXcmVersionHeader(RELAY_LOCATION, Version.V5),
         );
         expect(assetHubApi.init).toHaveBeenCalledWith("AssetHubPolkadot");
+        expect(assetHubApi.disconnect).toHaveBeenCalled();
       },
     );
 

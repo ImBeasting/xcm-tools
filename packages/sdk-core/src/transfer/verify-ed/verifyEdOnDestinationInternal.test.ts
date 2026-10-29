@@ -21,12 +21,13 @@ vi.mock('../fees')
 vi.mock('../utils')
 
 describe('verifyEdOnDestinationInternal', () => {
+  const clonedApi = {
+    init: vi.fn(),
+    disconnect: vi.fn().mockResolvedValue(undefined)
+  }
   const mockApi = {
     getMethod: vi.fn(),
-    clone: () => ({
-      init: vi.fn(),
-      disconnect: vi.fn().mockResolvedValue(undefined)
-    }),
+    clone: () => clonedApi,
     findAssetOnDestOrThrow: vi.fn()
   } as unknown as PolkadotApi<unknown, unknown, unknown>
 
@@ -115,6 +116,7 @@ describe('verifyEdOnDestinationInternal', () => {
     })
 
     expect(result).toBe(true)
+    expect(clonedApi.disconnect).toHaveBeenCalled()
     expect(getXcmFeeInternal).toHaveBeenCalledWith(
       expect.objectContaining({
         currency: [

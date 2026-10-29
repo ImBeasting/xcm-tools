@@ -972,6 +972,7 @@ describe('getXcmFeeOnce', () => {
 
     expect(getDestXcmFee).toHaveBeenCalledTimes(1)
     expect(mockCloneApi.init).toHaveBeenCalledWith('Darwinia', expect.any(Number))
+    expect(mockCloneApi.disconnect).toHaveBeenCalled()
 
     expect(res.destination).toEqual({
       fee: 1_000n,

@@ -84,6 +84,25 @@ describe('getMinTransferableAmountInternal', () => {
     vi.mocked(isAssetEqual).mockImplementation((a, b) => a?.symbol === b?.symbol)
   })
 
+  it('releases the cloned destination client', async () => {
+    const asset = { symbol: 'ASSET', decimals: 12, existentialDeposit: '10' } as TAssetInfo
+    mockResolvedAsset(asset, 100n)
+    findAssetOnDestOrThrowSpy.mockReturnValue(asset)
+    findNativeAssetInfoOrThrowSpy.mockReturnValue({ symbol: 'NATIVE' } as TAssetInfo)
+    vi.mocked(getAssetBalanceInternal).mockResolvedValue(0n)
+    vi.mocked(getXcmFee).mockResolvedValue({
+      success: true,
+      origin: { asset, fee: 2n, feeType: 'dryRun' },
+      hops: [],
+      destination: undefined
+    } as unknown as TGetXcmFeeResult)
+    buildInternal.mockResolvedValue({})
+
+    await mod.getMinTransferableAmountInternal(baseOptions)
+
+    expect(destApi.disconnect).toHaveBeenCalled()
+  })
+
   it('returns per-asset min amounts in input order for currency arrays', async () => {
     const usdt = { symbol: 'USDT', decimals: 6, existentialDeposit: '10' } as TAssetInfo
     const usdc = { symbol: 'USDC', decimals: 6, existentialDeposit: '10' } as TAssetInfo
